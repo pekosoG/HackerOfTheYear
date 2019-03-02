@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import socketIOClient from 'socket.io-client';
 import './App.css';
 
 import { Canvas, FormUserName } from './components'
@@ -7,23 +8,23 @@ class App extends Component {
   state = {
     gameStarted: false,
     map: [],
-    me: {}
+    me: {},
+    socket: socketIOClient(process.env.REACT_APP_SOCKET_BACKEND)
   }
 
-  gameStartStatus = value => {
-    this.setState({ gameStarted: value })
-  };
-
-  gameUpdateData = data => {
-    const { map, me } = data;
-    this.setState({ map, me  })
-  };
+  componentDidMount = () => {
+    const { socket } = this.state;
+    socket.on('gameStart', data => {
+      this.setState({ gameStarted: true, map: data.map, me: data.me });
+    });
+  }
 
   render() {
-    const { gameStarted, map, me } = this.state;
+    const { gameStarted, map, me, socket } = this.state;
+
     return (
       <div className="App">
-        {gameStarted ? <Canvas map={map} me={me} /> : <FormUserName gameStartStatus={this.gameStartStatus} gameUpdateData={this.gameUpdateData} />}
+        {gameStarted ? <Canvas map={map} me={me} socket={socket} /> : <FormUserName socket={socket} />}
       </div>
     );
   }

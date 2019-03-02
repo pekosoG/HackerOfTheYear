@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Stage, Layer, Rect, Group } from 'react-konva';
 import { DeviceOrientation,  } from 'react-event-components';
-import socketIOClient from 'socket.io-client';
 
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGTH = 1000;

@@ -1,23 +1,13 @@
 import React, { Component } from 'react';
-import socketIOClient from 'socket.io-client';
 
 class FormUserName extends Component {
     state = {
         username: '' 
     }
-    componentDidMount = () => {
-        const { gameStartStatus, gameUpdateData } = this.props;
-        this.socket = socketIOClient(process.env.REACT_APP_SOCKET_BACKEND);
-        this.socket.on('gameStart', data => {
-            console.log('data', data);
-          gameStartStatus(true);
-          gameUpdateData(data);
-        });
-    };
 
-    onSubmit = (value) => {
+    onSubmit = () => {
         const { username } = this.state;
-        this.socket.emit('setAlias', username);
+        this.props.socket.emit('setAlias', username);
     };
 
     onChange = (e) => {
