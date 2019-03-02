@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { Stage, Layer, Rect, Text } from 'react-konva';
-import Konva from 'konva';
+import { Stage, Layer, Rect, Group } from 'react-konva';
 import { DeviceOrientation,  } from 'react-event-components';
 import socketIOClient from 'socket.io-client';
+
+const CANVAS_WIDTH = 1000;
+const CANVAS_HEIGTH = 1000;
 
 class ColoredRect extends Component {
     state = {
@@ -19,10 +21,11 @@ class ColoredRect extends Component {
     };
 
     render() {
+        console.log('ColoredRect this.props', this.props);
       return (
         <Rect
-          x={this.state.x}
-          y={this.state.y}
+          x={0 | this.props.x }
+          y={0 | this.props.y}
           width={50}
           height={50}
           fill={this.state.color}
@@ -36,17 +39,18 @@ class ColoredRect extends Component {
 
 class Canvas extends Component {
     state = {
-        x: 20,
-        y: 20,
+        x: this.props.me.x,
+        y: this.props.me.y,
         deviceOrientation: {}
     };
 
     componentDidMount = () => {
-        this.socket = socketIOClient(process.env.REACT_APP_SOCKET_BACKEND);
-        this.socket.emit('setAlias', 'willsnake');
-        this.socket.on('gameStart', data => {
-          console.log('data', data);
-        });
+        console.log('this.refs["rect-layer"].children', this.refs["rect-layer"].children)
+        // this.socket = socketIOClient(process.env.REACT_APP_SOCKET_BACKEND);
+        // this.socket.emit('setAlias', 'willsnake');
+        // this.socket.on('gameStart', data => {
+        //   console.log('data', data);
+        // });
     };
 
     clamp = (value, min, max) =>
@@ -54,75 +58,50 @@ class Canvas extends Component {
 
     handleDeviceOrientation = ({beta, gamma, alpha, absolute}) => {
         const { x, y } = this.state;
+        // alert(JSON.stringify(this.props.me, null, 2));
         let newX = x + Number(gamma.toFixed());
         let newY = y + Number(beta.toFixed());
-        this.refs["rect-layer"].children[1].setAttrs({
+        this.refs["rect-layer"].children[0].setAttrs({
             x,
             y
         });
 
         this.refs["rect-layer"].draw();
         this.setState({
-            x: this.clamp(newX, 0, parseInt(window.innerWidth - this.refs["rect-layer"].children[1].attrs.width)),
-            y: this.clamp(newY, 0, parseInt(window.innerHeight - this.refs["rect-layer"].children[1].attrs.height)),
+            x: this.clamp(newX, 0, parseInt(CANVAS_WIDTH - this.refs["rect-layer"].children[1].attrs.width)),
+            y: this.clamp(newY, 0, parseInt(CANVAS_HEIGTH - this.refs["rect-layer"].children[1].attrs.height)),
           deviceOrientation: {
             beta,
             gamma,
             alpha,
             absolute
           }
-        })
+        });
       };
 
   render() {
     return (
-      <Stage width={window.innerWidth} height={window.innerHeight}>
+      <Stage width={CANVAS_WIDTH} height={CANVAS_HEIGTH}>
         <Layer ref={'rect-layer'}>
-          <Text text="Try click on rect" />
-          <ColoredRect x={this.state.x} y={this.state.y} />
+          <ColoredRect ref={'rect-layer-tank'} x={this.state.x} y={this.state.y} />
+          <DeviceOrientation do={this.handleDeviceOrientation} />
         </Layer>
-        <Layer
-            x={50}
-            y={50}
-        >
-            <DeviceOrientation do={this.handleDeviceOrientation} />
-            <Text text="DeviceOrientation" />
-        </Layer>
-        <Layer
-            x={50}
-            y={100}
-        >
-            <Text text={`beta ${this.state.deviceOrientation.beta}`} />
-        </Layer>
-        <Layer
-            x={50}
-            y={150}
-        >
-            <Text text={`gamma ${this.state.deviceOrientation.gamma}`} />
-        </Layer>
-        <Layer
-            x={50}
-            y={200}
-        >
-            <Text text={`alpha ${this.state.deviceOrientation.alpha}`} />
-        </Layer>
-        <Layer
-            x={50}
-            y={250}
-        >
-            <Text text={`absolute ${this.state.deviceOrientation.absolute}`} />
-        </Layer>
-        <Layer
-            x={50}
-            y={300}
-        >
-            <Text text={`x ${this.state.x}`} />
-        </Layer>
-        <Layer
-            x={50}
-            y={350}
-        >
-            <Text text={`y ${this.state.y}`} />
+        <Layer>
+         <Group>
+             {this.props.map.map( (square, key) => {
+                 return (
+                    <Rect
+                        x={square.x}
+                        y={square.y}
+                        width={square.w}
+                        height={square.h}
+                        fill={'black'}
+                        ref={`wall${key}`}
+                        key={`wall${key}`}
+                    />
+                 )
+             })}
+         </Group>
         </Layer>
       </Stage>
     );

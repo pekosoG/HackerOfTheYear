@@ -1,28 +1,30 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import { Canvas } from './components'
+import { Canvas, FormUserName } from './components'
 
 class App extends Component {
+  state = {
+    gameStarted: false,
+    map: [],
+    me: {}
+  }
+
+  gameStartStatus = value => {
+    this.setState({ gameStarted: value })
+  };
+
+  gameUpdateData = data => {
+    const { map, me } = data;
+    this.setState({ map, me  })
+  };
+
   render() {
+    const { gameStarted, map, me } = this.state;
     return (
-      // <div className="App">
-      //   <header className="App-header">
-      //     <img src={logo} className="App-logo" alt="logo" />
-      //     <p>
-      //       Edit <code>src/App.js</code> and save to reload.
-      //     </p>
-      //     <a
-      //       className="App-link"
-      //       href="https://reactjs.org"
-      //       target="_blank"
-      //       rel="noopener noreferrer"
-      //     >
-      //       Learn React
-      //     </a>
-      //   </header>
-      // </div>
-      <Canvas />
+      <div className="App">
+        {gameStarted ? <Canvas map={map} me={me} /> : <FormUserName gameStartStatus={this.gameStartStatus} gameUpdateData={this.gameUpdateData} />}
+      </div>
     );
   }
 }
