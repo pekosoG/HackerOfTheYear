@@ -24,7 +24,7 @@ class App extends Component {
 
     return (
       <div className="App">
-        {gameStarted ? <Canvas map={map} me={me} socket={socket} /> : <FormUserName socket={socket} />}
+        {gameStarted ? <Canvas map={map} me={me} socket={socket} gameEnded={this.gameEnded} /> : <FormUserName socket={socket} />}
       </div>
     );
   }
