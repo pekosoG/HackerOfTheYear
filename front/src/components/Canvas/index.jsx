@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Stage, Layer, Rect, Group } from 'react-konva';
+import { Stage, Layer, Rect, Group, Text } from 'react-konva';
 import { DeviceOrientation,  } from 'react-event-components';
 
 const CANVAS_WIDTH = 1000;
@@ -20,11 +20,10 @@ class ColoredRect extends Component {
     };
 
     render() {
-        console.log('ColoredRect this.props', this.props);
       return (
         <Rect
-          x={0 | this.props.x }
-          y={0 | this.props.y}
+          x={this.props.x}
+          y={this.props.y}
           width={50}
           height={50}
           fill={this.state.color}
@@ -43,28 +42,33 @@ class Canvas extends Component {
         deviceOrientation: {}
     };
 
-    componentDidMount = () => {
-        console.log('this.refs["rect-layer"].children', this.refs["rect-layer"].children)
-        // this.socket = socketIOClient(process.env.REACT_APP_SOCKET_BACKEND);
-        // this.socket.emit('setAlias', 'willsnake');
-        // this.socket.on('gameStart', data => {
-        //   console.log('data', data);
-        // });
-    };
-
     clamp = (value, min, max) =>
         Math.min(Math.max(value, min), max);
 
     handleDeviceOrientation = ({beta, gamma, alpha, absolute}) => {
-        const { x, y } = this.state;
-        // alert(JSON.stringify(this.props.me, null, 2));
+      const { x, y } = this.state;
+      // const { coloredRect, rectGroup, groupLayer } = this.refs;
+        // const target = coloredRect.getClientRect();
+        // groupLayer.children.each((group) => {
+        //   alert('group', JSON.stringify())
+        //   // do not check intersection with itself
+        //   if (group === target) {
+        //     return;
+        //   }
+        //   // if (haveIntersection(group.getClientRect(), targetRect)) {
+        //   //   group.findOne('.fillShape').fill('red');
+        //   // } else {
+        //   //   group.findOne('.fillShape').fill('grey');
+        //   // }
+        //   // do not need to call layer.draw() here
+        //   // because it will be called by dragmove action
+        // });
         let newX = x + Number(gamma.toFixed());
         let newY = y + Number(beta.toFixed());
-        this.refs["rect-layer"].children[0].setAttrs({
+        this.refs["rect-layer"].children[1].setAttrs({
             x,
             y
         });
-
         this.refs["rect-layer"].draw();
         this.setState({
             x: this.clamp(newX, 0, parseInt(CANVAS_WIDTH - this.refs["rect-layer"].children[1].attrs.width)),
@@ -82,25 +86,26 @@ class Canvas extends Component {
     return (
       <Stage width={CANVAS_WIDTH} height={CANVAS_HEIGTH}>
         <Layer ref={'rect-layer'}>
-          <ColoredRect ref={'rect-layer-tank'} x={this.state.x} y={this.state.y} />
-          <DeviceOrientation do={this.handleDeviceOrientation} />
+          <Text text="" />
+          <ColoredRect ref={'coloredRect'} x={this.state.x} y={this.state.y} />
         </Layer>
-        <Layer>
-         <Group>
-             {this.props.map.map( (square, key) => {
-                 return (
-                    <Rect
-                        x={square.x}
-                        y={square.y}
-                        width={square.w}
-                        height={square.h}
-                        fill={'black'}
-                        ref={`wall${key}`}
-                        key={`wall${key}`}
-                    />
-                 )
-             })}
-         </Group>
+        <Layer ref={'groupLayer'}>
+          <DeviceOrientation do={this.handleDeviceOrientation} />
+          <Group ref={'rectGroup'}>
+              {this.props.map.map( (square, key) => {
+                  return (
+                     <Rect
+                         x={square.x}
+                         y={square.y}
+                         width={square.w}
+                         height={square.h}
+                         fill={'black'}
+                         ref={`wall${key}`}
+                         key={`wall${key}`}
+                     />
+                  )
+              })}
+          </Group>
         </Layer>
       </Stage>
     );
